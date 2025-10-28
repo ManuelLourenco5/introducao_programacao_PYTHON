@@ -4,3 +4,8 @@ class Pessoa:
         self.idade = idade
     def cumprimentar(self):
         print(f"ola, o meu nome e {self.nome} e tenho {self.idade} anos")
+
+p1 = Pessoa("Ana", 30)
+p2 = Pessoa("Carlos", 25)
+p1.cumprimentar()
+p2.cumprimentar()
