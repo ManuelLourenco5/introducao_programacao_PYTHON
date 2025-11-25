@@ -40,7 +40,7 @@ placar_O = 0
 botao_reiniciar = None
 botao_menu = None
 
-# Funções
+# Funções de desenho e lógica (igual ao código original)
 def desenhar_tabuleiro():
     TELA.fill(BRANCO)
     for i in range(1, 3):
@@ -64,7 +64,7 @@ def desenhar_tabuleiro():
     if linha_vitoria:
         desenhar_linha_vitoria(*linha_vitoria)
 
-    desenhar_placar()  # mostra placar no topo
+    desenhar_placar()
 
     if not modo_ia and not jogo_encerrado and not menu_fim:
         texto_turno = fonte_turno.render(f"Vez do {jogador_atual}", True, AZUL if jogador_atual=="X" else VERMELHO)
@@ -120,29 +120,57 @@ def jogada_ia():
         linha, coluna = random.choice(vazios)
         tabuleiro[linha][coluna] = "O"
 
+# ------------------------------
+# Menu inicial estilo Pong
+# ------------------------------
 def menu_inicial():
     global modo_ia
-    fade()
-    while True:
-        TELA.fill(BRANCO)
-        titulo = fonte_titulo.render("Jogo do Galo", True, PRETO)
-        opc1 = fonte_menu.render("1 Jogador (contra IA)", True, PRETO)
-        opc2 = fonte_menu.render("2 Jogadores", True, PRETO)
-        rect1 = pygame.Rect(LARGURA//2-180, ALTURA//2-40, 360, 60)
-        rect2 = pygame.Rect(LARGURA//2-180, ALTURA//2+50, 360, 60)
-        pygame.draw.rect(TELA, CINZA, rect1, border_radius=10)
-        pygame.draw.rect(TELA, CINZA, rect2, border_radius=10)
-        TELA.blit(titulo, (LARGURA//2 - titulo.get_width()//2,150))
-        TELA.blit(opc1, (LARGURA//2 - opc1.get_width()//2, ALTURA//2-35))
-        TELA.blit(opc2, (LARGURA//2 - opc2.get_width()//2, ALTURA//2+55))
-        pygame.display.flip()
-        for evento in pygame.event.get():
-            if evento.type==pygame.QUIT:
-                pygame.quit(); sys.exit()
-            if evento.type==pygame.MOUSEBUTTONDOWN:
-                if rect1.collidepoint(evento.pos): modo_ia=True; fade(); return
-                if rect2.collidepoint(evento.pos): modo_ia=False; fade(); return
+    modo_ia = False
+    fonte_titulo_local = pygame.font.SysFont("Arial", 60, bold=True)
+    fonte_botao = pygame.font.SysFont("Arial", 36, bold=True)
 
+    botao_1jog = pygame.Rect(LARGURA//2 - 180, ALTURA//2 - 40, 360, 60)
+    botao_2jog = pygame.Rect(LARGURA//2 - 180, ALTURA//2 + 50, 360, 60)
+
+    while True:
+        TELA.fill(PRETO)
+
+        # Título
+        titulo = fonte_titulo_local.render("Jogo do Galo", True, BRANCO)
+        TELA.blit(titulo, (LARGURA//2 - titulo.get_width()//2, 150))
+
+        # Detectar hover
+        mx, my = pygame.mouse.get_pos()
+        cor_1jog = CINZA if not botao_1jog.collidepoint((mx,my)) else COR_HOVER
+        cor_2jog = CINZA if not botao_2jog.collidepoint((mx,my)) else COR_HOVER
+
+        # Desenhar botões
+        pygame.draw.rect(TELA, cor_1jog, botao_1jog, border_radius=10)
+        pygame.draw.rect(TELA, cor_2jog, botao_2jog, border_radius=10)
+
+        txt_1jog = fonte_botao.render("1 Jogador (contra IA)", True, BRANCO)
+        txt_2jog = fonte_botao.render("2 Jogadores", True, BRANCO)
+
+        TELA.blit(txt_1jog, (botao_1jog.centerx - txt_1jog.get_width()//2,
+                              botao_1jog.centery - txt_1jog.get_height()//2))
+        TELA.blit(txt_2jog, (botao_2jog.centerx - txt_2jog.get_width()//2,
+                              botao_2jog.centery - txt_2jog.get_height()//2))
+
+        pygame.display.flip()
+
+        # Eventos
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit(); sys.exit()
+            elif evento.type == pygame.MOUSEBUTTONDOWN:
+                if botao_1jog.collidepoint(evento.pos):
+                    modo_ia = True; return
+                elif botao_2jog.collidepoint(evento.pos):
+                    modo_ia = False; return
+
+# ------------------------------
+# Menu de fim de jogo (igual ao original)
+# ------------------------------
 def desenhar_menu_fim():
     global botao_reiniciar, botao_menu
     menu_rect = pygame.Rect(LARGURA//2-150, ALTURA//2-120, 300, 300)
@@ -175,7 +203,9 @@ def fade():
         pygame.display.update()
         pygame.time.delay(10)
 
+# ------------------------------
 # Loop principal
+# ------------------------------
 clock = pygame.time.Clock()
 menu_inicial()
 
@@ -204,11 +234,10 @@ while True:
             elif menu_fim:
                 mx, my = pygame.mouse.get_pos()
                 if botao_reiniciar.collidepoint((mx,my)):
-                    # Atualiza placar ao clicar "Tentar de Novo"
                     if vencedor=="X": placar_X += 1
                     elif vencedor=="O": placar_O += 1
                     reiniciar_jogo()
                 elif botao_menu.collidepoint((mx,my)):
                     reiniciar_jogo()
                     menu_inicial()
-                    placar_X, placar_O = 0, 0  # opcional: reset placar ao voltar ao menu
+                    placar_X, placar_O = 0, 0

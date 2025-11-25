@@ -17,6 +17,7 @@ VERDE = (0, 255, 0)
 VERMELHO = (255, 0, 0)
 BRANCO = (255, 255, 255)
 CINZA = (80, 80, 80)
+COR_HOVER = (120, 120, 120)
 
 # Tamanho dos blocos
 TAMANHO_BLOCO = 20
@@ -35,11 +36,59 @@ def mostrar_pontuacao(pontuacao):
     texto = fonte.render(f'Pontuação: {pontuacao}', True, BRANCO)
     TELA.blit(texto, (10, 10))
 
+# ------------------------------
+# Menu inicial
+# ------------------------------
+def menu_inicial():
+    fonte_titulo = pygame.font.SysFont('arial', 50, bold=True)
+    fonte_botao = pygame.font.SysFont('arial', 30)
+    
+    botao_jogar = pygame.Rect(LARGURA//2 - 120, 180, 240, 50)
+    botao_sair = pygame.Rect(LARGURA//2 - 120, 250, 240, 50)
+
+    while True:
+        TELA.fill(PRETO)
+
+        # Título
+        titulo = fonte_titulo.render("SNAKE GAME", True, VERDE)
+        TELA.blit(titulo, (LARGURA//2 - titulo.get_width()//2, 80))
+
+        # Hover dos botões
+        mx, my = pygame.mouse.get_pos()
+        cor_jogar = CINZA if not botao_jogar.collidepoint((mx,my)) else COR_HOVER
+        cor_sair = CINZA if not botao_sair.collidepoint((mx,my)) else COR_HOVER
+
+        # Botões
+        pygame.draw.rect(TELA, cor_jogar, botao_jogar, border_radius=8)
+        pygame.draw.rect(TELA, cor_sair, botao_sair, border_radius=8)
+
+        txt_jogar = fonte_botao.render("Jogar", True, BRANCO)
+        txt_sair = fonte_botao.render("Sair", True, BRANCO)
+        TELA.blit(txt_jogar, (botao_jogar.centerx - txt_jogar.get_width()//2,
+                               botao_jogar.centery - txt_jogar.get_height()//2))
+        TELA.blit(txt_sair, (botao_sair.centerx - txt_sair.get_width()//2,
+                              botao_sair.centery - txt_sair.get_height()//2))
+
+        pygame.display.flip()
+
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evento.type == pygame.MOUSEBUTTONDOWN:
+                if botao_jogar.collidepoint(evento.pos):
+                    return
+                elif botao_sair.collidepoint(evento.pos):
+                    pygame.quit()
+                    sys.exit()
+
+# ------------------------------
+# Tela de Game Over
+# ------------------------------
 def game_over(pontuacao):
     fonte_grande = pygame.font.SysFont('arial', 40)
     fonte_pequena = pygame.font.SysFont('arial', 28)
 
-    # Botões
     botao_reiniciar = pygame.Rect(LARGURA//2 - 120, 230, 240, 45)
     botao_sair = pygame.Rect(LARGURA//2 - 120, 290, 240, 45)
 
@@ -51,17 +100,20 @@ def game_over(pontuacao):
         TELA.blit(texto1, (LARGURA//2 - texto1.get_width()//2, 120))
         TELA.blit(texto2, (LARGURA//2 - texto2.get_width()//2, 170))
 
-        # Botão Reiniciar
-        pygame.draw.rect(TELA, CINZA, botao_reiniciar)
-        txt_reiniciar = fonte_pequena.render("Jogar de Novo", True, BRANCO)
-        TELA.blit(txt_reiniciar, (botao_reiniciar.centerx - txt_reiniciar.get_width()//2,
-                                  botao_reiniciar.centery - txt_reiniciar.get_height()//2))
+        # Botões
+        mx, my = pygame.mouse.get_pos()
+        cor_reiniciar = CINZA if not botao_reiniciar.collidepoint((mx,my)) else COR_HOVER
+        cor_sair = CINZA if not botao_sair.collidepoint((mx,my)) else COR_HOVER
 
-        # Botão Sair
-        pygame.draw.rect(TELA, CINZA, botao_sair)
+        pygame.draw.rect(TELA, cor_reiniciar, botao_reiniciar)
+        pygame.draw.rect(TELA, cor_sair, botao_sair)
+
+        txt_reiniciar = fonte_pequena.render("Jogar de Novo", True, BRANCO)
         txt_sair = fonte_pequena.render("Sair", True, BRANCO)
+        TELA.blit(txt_reiniciar, (botao_reiniciar.centerx - txt_reiniciar.get_width()//2,
+                                   botao_reiniciar.centery - txt_reiniciar.get_height()//2))
         TELA.blit(txt_sair, (botao_sair.centerx - txt_sair.get_width()//2,
-                             botao_sair.centery - txt_sair.get_height()//2))
+                              botao_sair.centery - txt_sair.get_height()//2))
 
         pygame.display.flip()
 
@@ -75,6 +127,11 @@ def game_over(pontuacao):
                 if botao_sair.collidepoint(evento.pos):
                     pygame.quit()
                     sys.exit()
+
+# ------------------------------
+# Loop principal do jogo
+# ------------------------------
+menu_inicial()  # Chama o menu inicial
 
 while True:
     cobra = [[100, 100]]
